@@ -11,14 +11,16 @@ use App\Helpers\Helper;
 use Illuminate\Support\Facades\URL;
 use Validator;
 use App\Models\User;
-use App\Models\Birth;
-use App\Models\Birth_Details;
+use App\Models\Hinducalendar;
+use App\Models\Hinducalendar_details;
+use App\Models\Coordinates;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use App\Astrologyapi\VedicRishiClient;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Collection;
+use App\HinduCalendar\client;
 
 class HinduCalendarController extends BaseController
 {
@@ -30,10 +32,10 @@ class HinduCalendarController extends BaseController
     public function index()
     {
         try{
-            return view('admin.birth_details.index');
+            return view('admin.hindu_calendar.index');
         }catch(\Exception $e){
             session()->flash('error',$e->getMessage());
-            return redirect()->route('birth.index');
+            return redirect()->route('hindu-calendar.index');
         }
     }
 
@@ -44,14 +46,15 @@ class HinduCalendarController extends BaseController
         }
     }
 
-    public static function getBirthAPI($birth_id){
-        Birth_Details::truncate();
+    public static function getHinducalendarAPI($hinducalendar_id){
+        Hinducalendar_details::truncate();
         $setting_details = Setting::orderby('id','DESC')->first();
-        $birth_details = Birth::where('id',$birth_id)->first();
+        $hinducalendar_details = Hinducalendar::where('id',$hinducalendar_id)->first();
+        dd($setting_details,$hinducalendar_details);
 
         // Date start_date to end_date
-        $_start_date = $birth_details->start_date;
-        $_to_date = $birth_details->to_date;
+        $_start_date = $hinducalendar_details->start_date;
+        $_to_date = $hinducalendar_details->to_date;
 
         $period = CarbonPeriod::create($_start_date, $_to_date);
         $hour = Carbon::now('Asia/Kolkata')->format("H");
@@ -76,12 +79,12 @@ class HinduCalendarController extends BaseController
                 'timezone' => 5.3
             );
 
-            // $resourceName = "advanced_panchang";    // subscribed plan api
-            $resourceName = "astro_details";
-            $vedicRishi = new VedicRishiClient($userId, $apiKey);
+            // panchang_details
+            $resourceName = "v2/astrology/panchang";
+            $auth_credation = new client('5017b31e-67d0-4c73-97b6-5a416f505772', 'U3poS4Hxs1TYlaNga75oHxVra7TOnMDiDjDaLJwL');
 
             // astro_details
-            $PanchangData = $vedicRishi->call($resourceName, $data['date'], $data['month'], $data['year'], $data['hour'], $data['minute'], $data['latitude'], $data['longitude'], $data['timezone']);
+            $PanchangData = $auth_credation->call($resourceName, $data['date'], $data['month'], $data['year'], $data['hour'], $data['minute'], $data['latitude'], $data['longitude'], $data['timezone']);
 
             // horo_chart
             $chartId = 'MOON';
@@ -95,7 +98,7 @@ class HinduCalendarController extends BaseController
             // dd(implode(',',$jsonData[0]->planet));
             // $jsonData = $responseData;
             // dd(preg_split('/(\s|-)/',$jsonData->Tithi));
-            Birth_Details::create([
+            Hinducalendar_details::create([
                 'date' => $to_date ?? '-',
                 'hindu_month' => $jsonData[12]->day ?? '-',
                 'month_planet' => $jsonData[12]->day ?? '-',
@@ -130,16 +133,24 @@ class HinduCalendarController extends BaseController
         return true;
     }
 
-    public static function postBirthList(Request $request){
+    public static function postCalendarList(Request $request){
+        $hinducalendar_details = Hinducalendar::orderby('id','DESC')->first();
+        if(isset($hinducalendar_details) && !empty($hinducalendar_details)){
+            self::getHinducalendarAPI($hinducalendar_details->id);
+            dd($request);
+            return Hinducalendar_details::getHinduCalendarDetails($request);
+        }else{
+            return redirect()->route('hindu-calendar.index');
+        }
+    }
 
-        $birth_details = Birth::orderby('id','DESC')->first();
-        self::getBirthAPI($birth_details->id);
-
-        return Birth_Details::getBirthDetails($request);
+    public function getlocation(Request $request){
+        $data = Coordinates::where('id',$request->locationID)->first();
+        return $data;
     }
 
     public function create(){
-        return view('admin.birth_details.create');
+        return view('admin.hindu_calendar.create');
     }
 
     public function store(Request $request){
@@ -147,23 +158,25 @@ class HinduCalendarController extends BaseController
             $validator = Validator::make($request->all(), [
                 'start_date' => 'required',
                 'to_date' => 'required',
+                'ayanamsa' => 'required',
+                'coordinates' => 'required',
             ]);
 
             if($validator->fails()) {
                 return back()->withInput()->withErrors($validator->errors());
             }
 
-            $recordId = Birth::createBirth($request);
+            $recordId = Hinducalendar::createHinducalendar($request);
             if($recordId){
                 session()->flash('success',  trans('messages.panchangCreated'));
             }else{
                 session()->flash('error',  trans('messages.somethingWrong'));
             }
 
-            return redirect()->route('birth.index');
+            return redirect()->route('hindu-calendar.index');
        }catch(\Exception $e){
             session()->flash('error',$e->getMessage());
-            return redirect()->route('birth.create')->withInput();
+            return redirect()->route('hindu-calendar.create')->withInput();
         }
     }
 

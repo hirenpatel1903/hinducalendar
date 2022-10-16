@@ -153,8 +153,8 @@ use Illuminate\Support\Facades\Auth;
                                 <span class="title">Panchang</span>
                             </a>
                         </li> --}}
-                        <li class="nav-item {{ Route::is('hinducalendar.index') || Route::is('hinducalendar.create')  ? 'active' : '' }}">
-                            <a href="{{route('hinducalendar.index')}}" class="nav-link nav-toggle">
+                        <li class="nav-item {{ Route::is('hindu-calendar.index') || Route::is('hindu-calendar.create')  ? 'active' : '' }}">
+                            <a href="{{route('hindu-calendar.index')}}" class="nav-link nav-toggle">
                                 <i class="fa fa-asterisk"></i>
                                 <span class="title">Hindu Calendar</span>
                             </a>

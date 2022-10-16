@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function(){
             /* Hindu Calendar Section */
             Route::resource('hindu-calendar', \admin\HinduCalendarController::class);
             Route::post('gethinducalendar', [App\Http\Controllers\admin\HinduCalendarController::class, 'postCalendarList'])->name('getcalendar');
+            Route::post('hindu-calendar/getlocation', [App\Http\Controllers\admin\HinduCalendarController::class, 'getlocation'])->name('getlocation');
 
             /* Setting Section */
             Route::get('setting', [App\Http\Controllers\admin\SettingController::class, 'edit'])->name('setting.edit');
