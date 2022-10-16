@@ -1,0 +1,48 @@
+.my-fixed {
+  background-color: #e9ecef;
+  padding: 4px;
+}
+
+.gradient-custom-2 {
+  /* fallback for old browsers */
+  background: #3B4A6B;
+
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #3B4A6B);
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #3B4A6B);
+}
+
+@media (min-width: 768px) {
+  .gradient-form {
+    height: 100vh !important;
+  }
+}
+@media (min-width: 769px) {
+  .gradient-custom-2 {
+    border-top-right-radius: .3rem;
+    border-bottom-right-radius: .3rem;
+  }
+}
+
+.text-decoration{
+  text-decoration:underline;
+}
+
+.signupfrmcontainer {
+    display: none;
+}
+
+.error{
+    color: red;
+}
+
+.form-control.error{ 
+    border-color:Red !important;
+    border-style:solid;
+    border-width:1px; 
+}
+.activenav  {
+    background-color: #a8b4cd;
+}
